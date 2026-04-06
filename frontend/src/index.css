@@ -1,0 +1,26 @@
+:root {
+  --primary: #2EC4B6;
+  --dark: #1A1A2E;
+  --primary-hover: #25a99d;
+  --dark-light: #252545;
+  --dark-lighter: #2f2f52;
+  --text-primary: #ffffff;
+  --text-secondary: #a8b2d8;
+  --text-muted: #6b7280;
+  --danger: #e94560;
+  --success: #4caf50;
+  --border: rgba(46, 196, 182, 0.2);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --radius: 12px;
+  --radius-full: 50px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+}
