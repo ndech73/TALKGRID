@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import '../styles/Login.css'
 
+const MIN_PASSWORD_LENGTH = 6
+
 function Login() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({ email: '', password: '' })
@@ -16,6 +18,17 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
+    if (formData.password.length < MIN_PASSWORD_LENGTH) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
+
     setLoading(true)
 
     const { error } = await supabase.auth.signInWithPassword({
