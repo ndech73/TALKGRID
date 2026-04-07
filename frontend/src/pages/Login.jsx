@@ -69,7 +69,7 @@ function Login() {
 
           <p
             className="auth-forgot"
-            onClick={() => navigate('/reset-password')}
+            onClick={() => navigate('/forgot-password')}
           >
             Forgot password?
           </p>

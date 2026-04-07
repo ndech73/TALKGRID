@@ -3,7 +3,8 @@ import Intro from './pages/Intro'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import ResetPassword from './pages/ResetPassword'
+import ResetPassword from './pages/Resetpassword'
+import ForgotPassword from './pages/Forgotpassword'
 
 function AppRouter() {
   return (
@@ -14,6 +15,7 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </BrowserRouter>
   )
