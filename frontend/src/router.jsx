@@ -3,7 +3,7 @@ import Intro from './pages/Intro'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import ResetPassword from './pages/ResetPassword'
+import ResetPassword from './pages/Resetpassword'
 
 function AppRouter() {
   return (

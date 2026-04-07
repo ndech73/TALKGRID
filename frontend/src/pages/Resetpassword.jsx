@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
-import '../styles/ResetPassword.css'
+import '../styles/Resetpassword.css'
 
 function ResetPassword() {
   const navigate = useNavigate()
