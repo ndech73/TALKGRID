@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,40 +8,134 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User Model - stores user profile information
 model User {
-  id            Int            @id @default(autoincrement())
-  username      String         @unique
-  email         String         @unique
-  password      String
-  avatar        String?
-  isOnline      Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  sentMessages  Message[]      @relation("SentMessages")
-  conversations Participant[]
+  id                String    @id @default(cuid())
+  supabaseId        String    @unique // Link to Supabase auth
+  email             String    @unique
+  username          String    @unique
+  displayName       String?
+  avatar            String?
+  bio               String?
+  status            String    @default("online") // online, offline, away, dnd
+  role              String    @default("user") // user, moderator, admin
+  emailVerified     Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastSeenAt        DateTime  @default(now())
+
+  // Relations
+  sessions          Session[]
+  messages          Message[]
+  auditLogs         AuditLog[]
+  conversations     Conversation[]
+  blockedUsers      BlockedUser[] @relation("blocker")
+  blockedBy         BlockedUser[] @relation("blocked")
+
+  @@map("users")
 }
 
-model Conversation {
-  id           Int           @id @default(autoincrement())
-  createdAt    DateTime      @default(now())
-  messages     Message[]
-  participants Participant[]
+// Session Model - tracks active user sessions
+model Session {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken      String    @unique
+  expiresAt         DateTime
+  createdAt         DateTime  @default(now())
+  lastActivityAt    DateTime  @default(now())
+  userAgent         String?
+  ipAddress         String?
+  isRevoked         Boolean   @default(false)
+
+  @@map("sessions")
+  @@index([userId])
+  @@index([refreshToken])
 }
 
-model Participant {
-  conversationId Int
-  userId         Int
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  user           User         @relation(fields: [userId], references: [id])
-
-  @@id([conversationId, userId])
-}
-
+// Message Model - stores chat messages
 model Message {
-  id             Int          @id @default(autoincrement())
-  content        String
-  senderId       Int
-  conversationId Int
-  createdAt      DateTime     @default(now())
-  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  id                String    @id @default(cuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId          String
+  sender            User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content           String
+  fileUrl           String?
+  fileType          String?
+  editedAt          DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@map("messages")
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+// Conversation Model - represents chat groups or DMs
+model Conversation {
+  id                String    @id @default(cuid())
+  name              String?
+  description       String?
+  type              String    @default("direct") // direct, group
+  createdBy         String
+  creator           User      @relation(fields: [createdBy], references: [id])
+  messages          Message[]
+  participants      ConversationParticipant[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("conversations")
+  @@index([createdBy])
+}
+
+// Conversation Participant Model - tracks who's in each conversation
+model ConversationParticipant {
+  id                String    @id @default(cuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId            String
+  role              String    @default("member") // member, moderator, admin
+  joinedAt          DateTime  @default(now())
+  leftAt            DateTime?
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+  @@index([conversationId])
+  @@index([userId])
+}
+
+// Blocked Users Model - for blocking functionality
+model BlockedUser {
+  id                String    @id @default(cuid())
+  blockerId         String
+  blocker           User      @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId         String
+  blocked           User      @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("blocked_users")
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+// Audit Log Model - tracks security and important events
+model AuditLog {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action            String    // login, logout, register, delete_account, etc.
+  resource          String?   // what was affected
+  resourceId        String?   // ID of affected resource
+  status            String    @default("success") // success, failure
+  ipAddress         String?
+  userAgent         String?
+  details           String?   // JSON string for additional info
+  createdAt         DateTime  @default(now())
+
+  @@map("audit_logs")
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
 }
