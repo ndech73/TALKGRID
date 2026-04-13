@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { apiClient } from '../services/api'
 import '../styles/Register.css'
 
 function Register() {
@@ -15,9 +16,89 @@ function Register() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+  const [usernameStatus, setUsernameStatus] = useState({
+    checking: false,
+    available: null,
+    message: ''
+  })
+  const [passwordStrength, setPasswordStrength] = useState({
+    hasMinLength: false,
+    hasUpperCase: false,
+    hasNumber: false,
+    hasSpecialChar: false
+  })
+
+  // Validate password strength
+  const validatePasswordStrength = (password) => {
+    const strength = {
+      hasMinLength: password.length >= 7,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+    }
+    setPasswordStrength(strength)
+    return strength
+  }
+
+  // Check if password meets all requirements
+  const isPasswordValid = (password) => {
+    const strength = validatePasswordStrength(password)
+    return strength.hasMinLength && 
+           strength.hasUpperCase && 
+           strength.hasNumber && 
+           strength.hasSpecialChar
+  }
+
+  // Check username availability (CASE-SENSITIVE)
+  const checkUsernameAvailability = async (username) => {
+    // Don't check if less than 3 characters
+    if (username.length < 3) {
+      setUsernameStatus({
+        checking: false,
+        available: null,
+        message: ''
+      })
+      return
+    }
+
+    setUsernameStatus({
+      checking: true,
+      available: null,
+      message: 'Checking availability...'
+    })
+
+    // Send username as-is (CASE-SENSITIVE)
+    const response = await apiClient.checkUsernameAvailability(username)
+
+    if (response.success && response.data.available) {
+      setUsernameStatus({
+        checking: false,
+        available: true,
+        message: '✓ Username available'
+      })
+    } else {
+      setUsernameStatus({
+        checking: false,
+        available: false,
+        message: response.data?.message || 'Username already taken'
+      })
+    }
+  }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
+    
+    // Validate username availability as user types (EXACT CASE-SENSITIVE MATCH)
+    if (name === 'username') {
+      checkUsernameAvailability(value)
+    }
+    
+    // Validate password strength as user types
+    if (name === 'password') {
+      validatePasswordStrength(value)
+    }
+    
     setError('')
   }
 
@@ -27,18 +108,29 @@ function Register() {
     setSuccess('')
 
     // Client-side validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match!')
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters!')
-      return
-    }
-
     if (formData.username.length < 3) {
       setError('Username must be at least 3 characters!')
+      return
+    }
+
+    // Check if username is available
+    if (!usernameStatus.available) {
+      setError('Please choose an available username!')
+      return
+    }
+
+    if (!formData.email) {
+      setError('Email is required!')
+      return
+    }
+
+    if (!isPasswordValid(formData.password)) {
+      setError('Password does not meet the security requirements!')
+      return
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match!')
       return
     }
 
@@ -53,6 +145,7 @@ function Register() {
     if (result.success) {
       setSuccess(result.message)
       setFormData({ username: '', email: '', password: '', confirmPassword: '' })
+      setUsernameStatus({ checking: false, available: null, message: '' })
       // Redirect to login after 2 seconds
       setTimeout(() => navigate('/login'), 2000)
     } else {
@@ -109,14 +202,25 @@ function Register() {
         <form className="auth-form" onSubmit={handleRegister}>
           <div className="auth-input-group">
             <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              placeholder="daniel_k"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
+            <p className="username-hint">Every letter, number, and character matters! • john ≠ John ≠ JOHN • j0hn! ≠ john</p>
+            <div className="username-input-wrapper">
+              <input
+                type="text"
+                name="username"
+                placeholder="daniel_k"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+              {usernameStatus.checking && (
+                <span className="username-spinner">⏳</span>
+              )}
+            </div>
+            {formData.username && (
+              <p className={`username-status ${usernameStatus.available ? 'available' : 'taken'}`}>
+                {usernameStatus.message}
+              </p>
+            )}
           </div>
 
           <div className="auth-input-group">
@@ -141,6 +245,37 @@ function Register() {
               onChange={handleChange}
               required
             />
+            
+            {/* Password Requirements Checklist */}
+            {formData.password && (
+              <div className="password-requirements">
+                <p className="requirements-title">Password must contain:</p>
+                <div className="requirement-item">
+                  <span className={`requirement-check ${passwordStrength.hasMinLength ? 'valid' : ''}`}>
+                    {passwordStrength.hasMinLength ? '✓' : '○'}
+                  </span>
+                  <span>At least 7 characters</span>
+                </div>
+                <div className="requirement-item">
+                  <span className={`requirement-check ${passwordStrength.hasUpperCase ? 'valid' : ''}`}>
+                    {passwordStrength.hasUpperCase ? '✓' : '○'}
+                  </span>
+                  <span>At least one uppercase letter (A-Z)</span>
+                </div>
+                <div className="requirement-item">
+                  <span className={`requirement-check ${passwordStrength.hasNumber ? 'valid' : ''}`}>
+                    {passwordStrength.hasNumber ? '✓' : '○'}
+                  </span>
+                  <span>At least one number (0-9)</span>
+                </div>
+                <div className="requirement-item">
+                  <span className={`requirement-check ${passwordStrength.hasSpecialChar ? 'valid' : ''}`}>
+                    {passwordStrength.hasSpecialChar ? '✓' : '○'}
+                  </span>
+                  <span>At least one special character (!@#$%^&*)</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="auth-input-group">
@@ -158,7 +293,7 @@ function Register() {
           {(error || authError) && <p className="auth-error">{error || authError}</p>}
           {success && <p className="auth-success">{success}</p>}
 
-          <button type="submit" className="auth-btn" disabled={loading}>
+          <button type="submit" className="auth-btn" disabled={loading || !usernameStatus.available}>
             {loading ? <span className="auth-spinner"></span> : 'Create Account'}
           </button>
         </form>

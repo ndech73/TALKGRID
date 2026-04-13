@@ -72,6 +72,13 @@ class APIClient {
   }
 
   // Auth endpoints
+  async checkUsernameAvailability(username) {
+    return this.request('/api/auth/check-username', {
+      method: 'POST',
+      body: JSON.stringify({ username })
+    })
+  }
+
   async registerUser(supabaseUser, username) {
     return this.request('/api/auth/register', {
       method: 'POST',

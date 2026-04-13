@@ -160,6 +160,38 @@ class AuthService {
   }
 
   /**
+   * Get user by username (CASE-SENSITIVE exact matching)
+   * Every letter, number, and special character matters!
+   * john, John, JOHN, j0hn, john! are all DIFFERENT usernames
+   */
+  static async getUserByUsername(username) {
+    try {
+      // Keep exact case and characters - NO modifications
+      return await prisma.user.findUnique({
+        where: { username: username },
+        select: {
+          id: true,
+          supabaseId: true,
+          email: true,
+          username: true,
+          displayName: true,
+          avatar: true,
+          bio: true,
+          status: true,
+          role: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+          lastSeenAt: true
+        }
+      })
+    } catch (error) {
+      console.error('Error fetching user by username:', error)
+      throw error
+    }
+  }
+
+  /**
    * Update user profile
    */
   static async updateUserProfile(userId, updates) {

@@ -11,94 +11,110 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  /**
-   * Initialize auth state on app load
-   */
   useEffect(() => {
+    let mounted = true
+
     const initializeAuth = async () => {
       try {
-        setLoading(true)
+        console.log('🔐 Initializing auth...')
+        
+        // Get current session from Supabase
+        const { data, error: sessionError } = await supabase.auth.getSession()
 
-        // Check if user is logged in with Supabase
-        const { data, error } = await supabase.auth.getSession()
+        if (!mounted) return
 
-        if (error) {
-          console.error('Auth error:', error)
+        if (sessionError) {
+          console.error('❌ Session error:', sessionError)
           setIsAuthenticated(false)
           setLoading(false)
           return
         }
 
         if (data.session) {
-          // User is logged in - fetch profile from backend
-          const response = await apiClient.getCurrentUser()
+          console.log('✅ User has active session:', data.session.user.email)
+          setSession(data.session)
+          setIsAuthenticated(true)
 
-          if (response.success) {
-            setUser(response.data)
-            setSession(data.session)
-            setIsAuthenticated(true)
-          } else {
-            setIsAuthenticated(false)
+          // Try to fetch full profile from backend
+          try {
+            const response = await apiClient.getCurrentUser()
+            if (response.success && response.data) {
+              console.log('✅ Fetched user profile from backend:', response.data)
+              setUser(response.data)
+            } else {
+              // If backend doesn't have profile yet, use Supabase user
+              console.log('⚠️ Backend profile not found, using Supabase data')
+              setUser(data.session.user)
+            }
+          } catch (err) {
+            console.warn('⚠️ Could not fetch profile:', err)
+            setUser(data.session.user)
           }
+        } else {
+          console.log('❌ No active session')
+          setIsAuthenticated(false)
         }
 
         setLoading(false)
       } catch (err) {
-        console.error('Error initializing auth:', err)
-        setError(err.message)
-        setLoading(false)
+        console.error('❌ Auth initialization error:', err)
+        if (mounted) {
+          setError(err.message)
+          setIsAuthenticated(false)
+          setLoading(false)
+        }
       }
     }
 
     initializeAuth()
 
     // Listen for auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          // User just signed in
-          const response = await apiClient.loginUser()
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Auth event:', event, session?.user?.email)
+
+      if (!mounted) return
+
+      if (event === 'SIGNED_IN' && session) {
+        console.log('✅ User signed in')
+        setSession(session)
+        setIsAuthenticated(true)
+
+        // Sync with backend
+        apiClient.loginUser().then(response => {
           if (response.success) {
-            setUser(response.data.user)
-            setSession(response.data.session)
-            setIsAuthenticated(true)
+            console.log('✅ Synced with backend')
+            setUser(response.data?.user || session.user)
+          } else {
+            setUser(session.user)
           }
-        } else if (event === 'SIGNED_OUT') {
-          // User signed out
-          setUser(null)
-          setSession(null)
-          setIsAuthenticated(false)
-        } else if (event === 'TOKEN_REFRESHED') {
-          // Token was refreshed
-          setSession(session)
-        }
+        }).catch(err => {
+          console.warn('⚠️ Backend sync failed:', err)
+          setUser(session.user)
+        })
+      } else if (event === 'SIGNED_OUT') {
+        console.log('✅ User signed out')
+        setSession(null)
+        setUser(null)
+        setIsAuthenticated(false)
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        console.log('🔄 Token refreshed')
+        setSession(session)
       }
-    )
-
-    // Listen for unauthorized events
-    const handleUnauthorized = () => {
-      setUser(null)
-      setSession(null)
-      setIsAuthenticated(false)
-      setError('Your session has expired. Please login again.')
-    }
-
-    window.addEventListener('unauthorized', handleUnauthorized)
+    })
 
     // Cleanup
     return () => {
-      listener?.subscription.unsubscribe()
-      window.removeEventListener('unauthorized', handleUnauthorized)
+      mounted = false
+      authListener?.subscription?.unsubscribe()
     }
   }, [])
 
-  /**
-   * Register with email and password
-   */
   const register = useCallback(async (email, password, username) => {
     try {
       setError(null)
       setLoading(true)
+
+      console.log('📝 Registering user:', email)
 
       // Sign up with Supabase
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -117,19 +133,23 @@ export function AuthProvider({ children }) {
         throw new Error('Registration failed')
       }
 
+      console.log('✅ User signed up with Supabase')
+
       // Create user profile in backend
-      const response = await apiClient.registerUser(data.user, username)
-
-      if (!response.success) {
-        throw new Error(response.error)
+      try {
+        const response = await apiClient.registerUser(data.user, username)
+        if (response.success) {
+          console.log('✅ User profile created in backend')
+          setUser(response.data)
+        }
+      } catch (err) {
+        console.warn('⚠️ Backend registration failed, but Supabase signup succeeded')
       }
-
-      setUser(response.data)
-      setIsAuthenticated(true)
 
       return { success: true, message: 'Registration successful! Please verify your email.' }
     } catch (err) {
       const message = err.message || 'Registration failed'
+      console.error('❌ Registration error:', message)
       setError(message)
       return { success: false, error: message }
     } finally {
@@ -137,15 +157,13 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  /**
-   * Login with email and password
-   */
   const login = useCallback(async (email, password) => {
     try {
       setError(null)
       setLoading(true)
 
-      // Sign in with Supabase
+      console.log('🔑 Logging in:', email)
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -159,20 +177,29 @@ export function AuthProvider({ children }) {
         throw new Error('Login failed')
       }
 
-      // Create session in backend
-      const response = await apiClient.loginUser()
+      console.log('✅ Signed in with Supabase')
 
-      if (!response.success) {
-        throw new Error(response.error)
-      }
-
-      setUser(response.data.user)
       setSession(data.session)
       setIsAuthenticated(true)
+
+      // Sync with backend
+      try {
+        const response = await apiClient.loginUser()
+        if (response.success) {
+          console.log('✅ Synced login with backend')
+          setUser(response.data?.user || data.session.user)
+        } else {
+          setUser(data.session.user)
+        }
+      } catch (err) {
+        console.warn('⚠️ Backend sync failed')
+        setUser(data.session.user)
+      }
 
       return { success: true }
     } catch (err) {
       const message = err.message || 'Login failed'
+      console.error('❌ Login error:', message)
       setError(message)
       return { success: false, error: message }
     } finally {
@@ -180,12 +207,11 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  /**
-   * Login with OAuth provider (Google, etc.)
-   */
   const loginWithOAuth = useCallback(async (provider) => {
     try {
       setError(null)
+
+      console.log('🔑 Logging in with OAuth:', provider)
 
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
@@ -201,21 +227,26 @@ export function AuthProvider({ children }) {
       return { success: true }
     } catch (err) {
       const message = err.message || `${provider} login failed`
+      console.error('❌ OAuth error:', message)
       setError(message)
       return { success: false, error: message }
     }
   }, [])
 
-  /**
-   * Logout user
-   */
   const logout = useCallback(async () => {
     try {
       setError(null)
 
+      console.log('👋 Logging out')
+
       // Revoke session in backend
       if (session?.id) {
-        await apiClient.logoutUser(session.id)
+        try {
+          await apiClient.logoutUser(session.id)
+          console.log('✅ Backend logout successful')
+        } catch (err) {
+          console.warn('⚠️ Backend logout failed')
+        }
       }
 
       // Sign out from Supabase
@@ -229,17 +260,16 @@ export function AuthProvider({ children }) {
       setSession(null)
       setIsAuthenticated(false)
 
+      console.log('✅ Logged out successfully')
       return { success: true }
     } catch (err) {
       const message = err.message || 'Logout failed'
+      console.error('❌ Logout error:', message)
       setError(message)
       return { success: false, error: message }
     }
   }, [session])
 
-  /**
-   * Update user profile
-   */
   const updateProfile = useCallback(async (updates) => {
     try {
       setError(null)
@@ -262,9 +292,6 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  /**
-   * Block a user
-   */
   const blockUser = useCallback(async (userId) => {
     try {
       setError(null)
@@ -283,9 +310,6 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  /**
-   * Unblock a user
-   */
   const unblockUser = useCallback(async (userId) => {
     try {
       setError(null)

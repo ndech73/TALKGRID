@@ -21,9 +21,11 @@ export function ProtectedRoute({ children }) {
   }
 
   if (!isAuthenticated) {
+    console.log('Not authenticated, redirecting to login')
     return <Navigate to="/login" replace />
   }
 
+  console.log('Authenticated, showing protected content')
   return children
 }
 
@@ -39,6 +41,7 @@ export function AdminRoute({ children }) {
         <div className="auth-card">
           <div style={{ textAlign: 'center', padding: '40px' }}>
             <div className="auth-spinner"></div>
+            <p style={{ color: '#a8b2d8', marginTop: '16px' }}>Loading...</p>
           </div>
         </div>
       </div>
@@ -58,19 +61,8 @@ export function AdminRoute({ children }) {
 export function GuestRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="auth-container">
-        <div className="auth-card">
-          <div style={{ textAlign: 'center', padding: '40px' }}>
-            <div className="auth-spinner"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (isAuthenticated) {
+  // Don't wait for loading if not authenticated
+  if (!loading && isAuthenticated) {
     return <Navigate to="/home" replace />
   }
 

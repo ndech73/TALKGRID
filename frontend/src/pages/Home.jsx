@@ -1,44 +1,71 @@
+import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 import '../styles/Home.css'
 
 function Home() {
+  const { user, logout, loading } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    const result = await logout()
+    if (result.success) {
+      navigate('/login')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="home-container">
+        <div className="loading">Loading...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="home-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h2>💬 talkgrid</h2>
+      <header className="home-header">
+        <div className="header-left">
+          <h1 className="logo">💬 TalkGrid</h1>
         </div>
-        <div className="search-bar">
-          <input type="text" placeholder="🔍 Search chats..." />
-        </div>
-        <ul className="chat-list">
-          {['Alice', 'Bob', 'Charlie', 'Diana'].map((name) => (
-            <li key={name} className="chat-item">
-              <div className="avatar">{name[0]}</div>
-              <div className="chat-info">
-                <span className="chat-name">{name}</span>
-                <span className="chat-preview">Hey, how are you?</span>
+        <div className="header-right">
+          <div className="user-menu">
+            <div className="user-info">
+              <div className="user-avatar">{user?.displayName?.charAt(0) || 'U'}</div>
+              <div className="user-details">
+                <p className="user-name">{user?.displayName || user?.username || 'User'}</p>
+                <p className="user-status">{user?.status || 'online'}</p>
               </div>
-              <div className="online-dot"></div>
-            </li>
-          ))}
-        </ul>
-      </aside>
-
-      <main className="chat-area">
-        <div className="chat-header">
-          <div className="avatar">A</div>
-          <div>
-            <h3>Alice</h3>
-            <span className="status">Online</span>
+            </div>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </div>
-        <div className="messages">
-          <div className="message received">Hey! How are you? 👋</div>
-          <div className="message sent">I'm good, thanks!</div>
-        </div>
-        <div className="message-input">
-          <input type="text" placeholder="Type a message..." />
-          <button>Send</button>
+      </header>
+
+      <main className="home-main">
+        <div className="welcome-section">
+          <h2>Welcome, {user?.displayName || user?.username}!</h2>
+          <p>You're successfully logged in to TalkGrid</p>
+          
+          <div className="user-profile-card">
+            <h3>Your Profile</h3>
+            <div className="profile-info">
+              <p><strong>Email:</strong> {user?.email}</p>
+              <p><strong>Username:</strong> {user?.username}</p>
+              <p><strong>Status:</strong> {user?.status}</p>
+              <p><strong>Role:</strong> {user?.role}</p>
+              <p><strong>Member Since:</strong> {new Date(user?.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          <div className="coming-soon">
+            <h3>Coming Soon</h3>
+            <p>✨ Real-time messaging</p>
+            <p>✨ Group conversations</p>
+            <p>✨ User profiles</p>
+            <p>✨ And more!</p>
+          </div>
         </div>
       </main>
     </div>

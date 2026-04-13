@@ -1,14 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../services/supabase'
 import '../styles/Login.css'
 
 function Login() {
   const navigate = useNavigate()
-  const { login, loginWithOAuth, error: authError } = useAuth()
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Listen for auth changes and redirect
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        console.log('Auth state changed to SIGNED_IN, redirecting to /home')
+        setTimeout(() => navigate('/home'), 500)
+      }
+    })
+
+    return () => authListener?.subscription?.unsubscribe()
+  }, [navigate])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -20,25 +31,54 @@ function Login() {
     setError('')
     setLoading(true)
 
-    const result = await login(formData.email, formData.password)
+    try {
+      console.log('Attempting login with:', formData.email)
 
-    if (result.success) {
-      navigate('/home')
-    } else {
-      setError(result.error)
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      })
+
+      if (signInError) {
+        console.error('Login error:', signInError)
+        setLoading(false)
+        throw new Error(signInError.message)
+      }
+
+      if (!data.session) {
+        setLoading(false)
+        throw new Error('Login failed - no session created')
+      }
+
+      console.log('Login successful, session created:', data.session.user.email)
+      // Redirect happens via onAuthStateChange listener above
+      // Don't set loading to false here - let the redirect happen
+
+    } catch (err) {
+      console.error('Login exception:', err)
+      setError('❌ ' + (err.message || 'Login failed'))
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   const handleGoogleLogin = async () => {
-    setError('')
-    setLoading(true)
+    try {
+      setError('')
+      setLoading(true)
 
-    const result = await loginWithOAuth('google')
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/home`
+        }
+      })
 
-    if (!result.success) {
-      setError(result.error)
+      if (oauthError) {
+        throw oauthError
+      }
+    } catch (err) {
+      console.error('Google login error:', err)
+      setError('❌ Google login failed: ' + err.message)
       setLoading(false)
     }
   }
@@ -77,37 +117,44 @@ function Login() {
 
         <form className="auth-form" onSubmit={handleLogin}>
           <div className="auth-input-group">
-            <label>Email</label>
+            <label htmlFor="email">Email</label>
             <input
+              id="email"
               type="email"
               name="email"
               placeholder="you@email.com"
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={loading}
+              autoComplete="email"
             />
           </div>
 
           <div className="auth-input-group">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
             <input
+              id="password"
               type="password"
               name="password"
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={loading}
+              autoComplete="current-password"
             />
           </div>
 
           <p
             className="auth-forgot"
             onClick={() => navigate('/forgot-password')}
+            style={{ cursor: 'pointer' }}
           >
             Forgot password?
           </p>
 
-          {(error || authError) && <p className="auth-error">{error || authError}</p>}
+          {error && <p className="auth-error">{error}</p>}
 
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? <span className="auth-spinner"></span> : 'Login'}
@@ -116,7 +163,7 @@ function Login() {
 
         <div className="auth-footer">
           <p>Don't have an account?{' '}
-            <span onClick={() => navigate('/register')}>Create one</span>
+            <span onClick={() => navigate('/register')} style={{ cursor: 'pointer' }}>Create one</span>
           </p>
         </div>
 

@@ -243,3 +243,234 @@
   height: 1px;
   background: rgba(46, 196, 182, 0.1);
 }
+
+/* Add these styles to your existing Register.css file */
+
+.password-requirements {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.requirements-title {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  display: block;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  color: #666;
+}
+
+.requirement-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ddd;
+  flex-shrink: 0;
+}
+
+.requirement-check.valid {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+
+/* Username field with availability checker */
+.username-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.username-input-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.username-spinner {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.username-status {
+  font-size: 12px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.username-status.available {
+  color: #27ae60;
+  background: #ecf0f1;
+}
+
+.username-status.taken {
+  color: #e74c3c;
+  background: #fadbd8;
+}
+
+/* Password Requirements */
+.password-requirements {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.requirements-title {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  display: block;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  color: #666;
+}
+
+.requirement-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ddd;
+  flex-shrink: 0;
+}
+
+.requirement-check.valid {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+
+/* Username field with availability checker */
+.username-hint {
+  font-size: 11px;
+  color: #7f8c8d;
+  margin: 4px 0 8px 0;
+  font-style: italic;
+  background: #ecf0f1;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border-left: 3px solid #3498db;
+}
+
+.username-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.username-input-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.username-spinner {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.username-status {
+  font-size: 12px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.username-status.available {
+  color: #27ae60;
+  background: #ecf0f1;
+}
+
+.username-status.taken {
+  color: #e74c3c;
+  background: #fadbd8;
+}
+
+/* Password Requirements */
+.password-requirements {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.requirements-title {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  display: block;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  color: #666;
+}
+
+.requirement-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ddd;
+  flex-shrink: 0;
+}
+
+.requirement-check.valid {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}

@@ -1,8 +1,51 @@
 const express = require('express')
 const router = express.Router()
-const AuthService = require('../services/authService')
+const AuthService = require('../services/authServices')
 const { verifyToken } = require('../middleware/auth')
 const { requireRole } = require('../middleware/authorization')
+
+/**
+ * @route   POST /api/auth/check-username
+ * @desc    Check if username is available (CASE-SENSITIVE)
+ * @access  Public
+ */
+router.post('/check-username', async (req, res) => {
+  try {
+    const { username } = req.body
+
+    if (!username || username.length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username must be at least 3 characters'
+      })
+    }
+
+    // Check if username exists (EXACT CASE-SENSITIVE MATCH)
+    const existingUser = await AuthService.getUserByUsername(username)
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        available: false,
+        message: 'Username already taken'
+      })
+    }
+
+    res.json({
+      success: true,
+      available: true,
+      message: 'Username is available'
+    })
+  } catch (error) {
+    console.error('Username check error:', error)
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check username availability',
+      error: error.message
+    })
+  }
+})
 
 /**
  * @route   POST /api/auth/register
@@ -24,6 +67,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Username must be at least 3 characters'
+      })
+    }
+
+    // Check if username is already taken (EXACT CASE-SENSITIVE MATCH)
+    const existingUser = await AuthService.getUserByUsername(username)
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'Username already exists'
       })
     }
 
