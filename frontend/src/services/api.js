@@ -14,24 +14,29 @@ class APIClient {
    * Get authorization header with Supabase token
    */
   async getAuthHeaders() {
+    // Always include JSON content type so Express can parse request bodies
+    // even when the user is logged out (public endpoints like check-username).
+    const baseHeaders = { 'Content-Type': 'application/json' }
+
     const { data, error } = await supabase.auth.getSession()
-    
+
     if (error || !data.session) {
-      return {}
+      return baseHeaders
     }
 
     return {
-      'Authorization': `Bearer ${data.session.access_token}`,
-      'Content-Type': 'application/json'
+      ...baseHeaders,
+      Authorization: `Bearer ${data.session.access_token}`
     }
   }
 
   /**
    * Make API request with automatic error handling
+   * Returns a consistent shape for both success and error cases.
    */
   async request(endpoint, options = {}) {
     const headers = await this.getAuthHeaders()
-    
+
     const config = {
       ...options,
       headers: {
@@ -42,31 +47,57 @@ class APIClient {
 
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, config)
-      const data = await response.json()
+
+      // Parse JSON safely (backend usually returns JSON, but don't assume)
+      let payload = null
+      try {
+        payload = await response.json()
+      } catch {
+        payload = null
+      }
 
       // Handle 401 - token expired or invalid
       if (response.status === 401) {
-        // Supabase will handle token refresh automatically
-        // But we can trigger a logout event
         window.dispatchEvent(new CustomEvent('unauthorized'))
       }
 
       // Handle 403 - forbidden (authorization failed)
       if (response.status === 403) {
-        throw new Error('Access denied: You do not have permission for this action')
+        return {
+          success: false,
+          status: 403,
+          data: payload?.data ?? null,
+          message:
+            payload?.message ||
+            'Access denied: You do not have permission for this action'
+        }
       }
 
       if (!response.ok) {
-        throw new Error(data.message || `API Error: ${response.status}`)
+        return {
+          success: false,
+          status: response.status,
+          data: payload?.data ?? null,
+          message: payload?.message || `API Error: ${response.status}`,
+          error:
+            payload?.error || payload?.message || `API Error: ${response.status}`
+        }
       }
 
-      return { success: true, data: data.data, message: data.message }
+      return {
+        success: true,
+        status: response.status,
+        data: payload?.data ?? null,
+        message: payload?.message
+      }
     } catch (error) {
       console.error('API Error:', error)
-      return { 
-        success: false, 
-        error: error.message || 'An error occurred',
-        message: error.message 
+      return {
+        success: false,
+        status: null,
+        data: null,
+        message: error?.message || 'Network error',
+        error: error?.message || 'Network error'
       }
     }
   }
@@ -128,6 +159,16 @@ class APIClient {
 
   async getAuditLogs() {
     return this.request('/api/auth/audit-logs')
+  }
+
+  /**
+   * Security login gateway (server-enforced lockouts + rate limiting)
+   */
+  async securityLogin(email, password) {
+    return this.request('/api/security/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    })
   }
 
   // Message endpoints

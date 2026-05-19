@@ -5,11 +5,15 @@ const { Server } = require('socket.io')
 require('dotenv').config()
 
 const app = express()
+
+// If you deploy behind a reverse proxy (Render/Heroku/Nginx/Cloudflare), enable this
+app.set('trust proxy', 1)
+
 const server = http.createServer(app)
 const io = new Server(server, {
-  cors: { 
-    origin: process.env.CLIENT_URL, 
-    methods: ['GET', 'POST'] 
+  cors: {
+    origin: process.env.CLIENT_URL,
+    methods: ['GET', 'POST']
   }
 })
 
@@ -19,6 +23,7 @@ app.use(express.json())
 // Routes
 app.use('/api/auth', require('./src/routes/auth'))
 app.use('/api/messages', require('./src/routes/messages'))
+app.use('/api/security', require('./src/routes/security'))
 
 // Socket.IO
 require('./src/socket/socket')(io)

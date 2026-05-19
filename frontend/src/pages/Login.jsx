@@ -1,25 +1,46 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../services/supabase'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import '../styles/Login.css'
+
+function EyeIcon({ off = false }) {
+  return off ? (
+    // eye-off
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M2.1 3.51 3.51 2.1l18.38 18.38-1.41 1.41-3.02-3.02A11.7 11.7 0 0 1 12 20C6 20 2.73 15.11 1 12c.64-1.16 1.62-2.6 3.02-3.98L2.1 3.51Zm6.02 6.02A3.5 3.5 0 0 0 12 15.5c.51 0 1-.11 1.44-.3l-1.06-1.06c-.12.02-.25.03-.38.03A2.5 2.5 0 0 1 9.5 12c0-.13.01-.26.03-.38L8.12 10.2ZM12 4c6 0 9.27 4.89 11 8-1.03 1.85-2.88 4.52-5.86 6.23l-1.46-1.46C17.97 15.5 19.48 13.57 20.8 12 19.3 9.36 16.5 6 12 6c-1.02 0-1.98.17-2.87.46L7.52 4.85A11.9 11.9 0 0 1 12 4Zm0 3.5A4.5 4.5 0 0 1 16.5 12c0 .56-.1 1.1-.28 1.6l-1.53-1.53c.2-.92-.07-1.92-.8-2.65a2.99 2.99 0 0 0-2.65-.8L9.7 7.1c.71-.38 1.52-.6 2.3-.6Z"
+      />
+    </svg>
+  ) : (
+    // eye
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 5c6 0 10 5.5 11 7-1 1.5-5 7-11 7S2 13.5 1 12c1-1.5 5-7 11-7Zm0 2c-4.52 0-7.5 3.92-8.74 5 1.24 1.08 4.22 5 8.74 5s7.5-3.92 8.74-5C19.5 10.92 16.52 7 12 7Zm0 1.5A3.5 3.5 0 1 1 8.5 12 3.5 3.5 0 0 1 12 8.5Zm0 2A1.5 1.5 0 1 0 13.5 12 1.5 1.5 0 0 0 12 10.5Z"
+      />
+    </svg>
+  )
+}
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login, loginWithOAuth } = useAuth()
+
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
-  // Listen for auth changes and redirect
+  // Show "unlocked" success message if redirected from backend unlock link
+  const [unlockedNotice, setUnlockedNotice] = useState(false)
+
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        console.log('Auth state changed to SIGNED_IN, redirecting to /home')
-        setTimeout(() => navigate('/home'), 500)
-      }
-    })
-
-    return () => authListener?.subscription?.unsubscribe()
-  }, [navigate])
+    const params = new URLSearchParams(location.search)
+    const unlocked = params.get('unlocked') === '1'
+    setUnlockedNotice(unlocked)
+  }, [location.search])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -32,31 +53,17 @@ function Login() {
     setLoading(true)
 
     try {
-      console.log('Attempting login with:', formData.email)
+      const result = await login(formData.email, formData.password)
 
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password
-      })
-
-      if (signInError) {
-        console.error('Login error:', signInError)
-        setLoading(false)
-        throw new Error(signInError.message)
+      if (!result.success) {
+        throw new Error(result.error || 'Login failed')
       }
 
-      if (!data.session) {
-        setLoading(false)
-        throw new Error('Login failed - no session created')
-      }
-
-      console.log('Login successful, session created:', data.session.user.email)
-      // Redirect happens via onAuthStateChange listener above
-      // Don't set loading to false here - let the redirect happen
-
+      // AuthContext will set the session; we can redirect immediately.
+      setTimeout(() => navigate('/home'), 300)
     } catch (err) {
-      console.error('Login exception:', err)
       setError('❌ ' + (err.message || 'Login failed'))
+    } finally {
       setLoading(false)
     }
   }
@@ -66,19 +73,13 @@ function Login() {
       setError('')
       setLoading(true)
 
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/home`
-        }
-      })
-
-      if (oauthError) {
-        throw oauthError
+      const result = await loginWithOAuth('google')
+      if (!result.success) {
+        throw new Error(result.error || 'Google login failed')
       }
+      // Supabase OAuth flow redirects; no navigate needed here.
     } catch (err) {
-      console.error('Google login error:', err)
-      setError('❌ Google login failed: ' + err.message)
+      setError('❌ Google login failed: ' + (err.message || 'Google login failed'))
       setLoading(false)
     }
   }
@@ -86,12 +87,26 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-
         <div className="auth-header">
           <div className="auth-logo">💬</div>
           <h1 className="auth-title">Welcome back</h1>
           <p className="auth-subtitle">Sign in to talkgrid</p>
         </div>
+
+        {unlockedNotice && (
+          <p
+            style={{
+              padding: '10px',
+              background: '#e6ffed',
+              border: '1px solid #b7eb8f',
+              borderRadius: '8px',
+              marginBottom: '12px',
+              color: '#135200'
+            }}
+          >
+            ✅ Account unlocked. You can log in now.
+          </p>
+        )}
 
         {/* Social Login */}
         <div className="auth-social">
@@ -133,17 +148,30 @@ function Login() {
 
           <div className="auth-input-group">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              autoComplete="current-password"
-            />
+
+            <div className="password-input-wrapper">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                autoComplete="current-password"
+              />
+
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                disabled={loading}
+              >
+                <EyeIcon off={showPassword} />
+              </button>
+            </div>
           </div>
 
           <p
@@ -166,7 +194,6 @@ function Login() {
             <span onClick={() => navigate('/register')} style={{ cursor: 'pointer' }}>Create one</span>
           </p>
         </div>
-
       </div>
     </div>
   )

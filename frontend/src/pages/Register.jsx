@@ -4,6 +4,26 @@ import { useAuth } from '../hooks/useAuth'
 import { apiClient } from '../services/api'
 import '../styles/Register.css'
 
+function EyeIcon({ off = false }) {
+  return off ? (
+    // eye-off
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M2.1 3.51 3.51 2.1l18.38 18.38-1.41 1.41-3.02-3.02A11.7 11.7 0 0 1 12 20C6 20 2.73 15.11 1 12c.64-1.16 1.62-2.6 3.02-3.98L2.1 3.51Zm6.02 6.02A3.5 3.5 0 0 0 12 15.5c.51 0 1-.11 1.44-.3l-1.06-1.06c-.12.02-.25.03-.38.03A2.5 2.5 0 0 1 9.5 12c0-.13.01-.26.03-.38L8.12 10.2ZM12 4c6 0 9.27 4.89 11 8-1.03 1.85-2.88 4.52-5.86 6.23l-1.46-1.46C17.97 15.5 19.48 13.57 20.8 12 19.3 9.36 16.5 6 12 6c-1.02 0-1.98.17-2.87.46L7.52 4.85A11.9 11.9 0 0 1 12 4Zm0 3.5A4.5 4.5 0 0 1 16.5 12c0 .56-.1 1.1-.28 1.6l-1.53-1.53c.2-.92-.07-1.92-.8-2.65a2.99 2.99 0 0 0-2.65-.8L9.7 7.1c.71-.38 1.52-.6 2.3-.6Z"
+      />
+    </svg>
+  ) : (
+    // eye
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 5c6 0 10 5.5 11 7-1 1.5-5 7-11 7S2 13.5 1 12c1-1.5 5-7 11-7Zm0 2c-4.52 0-7.5 3.92-8.74 5 1.24 1.08 4.22 5 8.74 5s7.5-3.92 8.74-5C19.5 10.92 16.52 7 12 7Zm0 1.5A3.5 3.5 0 1 1 8.5 12 3.5 3.5 0 0 1 12 8.5Zm0 2A1.5 1.5 0 1 0 13.5 12 1.5 1.5 0 0 0 12 10.5Z"
+      />
+    </svg>
+  )
+}
+
 function Register() {
   const navigate = useNavigate()
   const { register, loginWithOAuth, error: authError } = useAuth()
@@ -16,6 +36,9 @@ function Register() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   const [usernameStatus, setUsernameStatus] = useState({
     checking: false,
     available: null,
@@ -43,16 +66,20 @@ function Register() {
   // Check if password meets all requirements
   const isPasswordValid = (password) => {
     const strength = validatePasswordStrength(password)
-    return strength.hasMinLength && 
-           strength.hasUpperCase && 
-           strength.hasNumber && 
-           strength.hasSpecialChar
+    return (
+      strength.hasMinLength &&
+      strength.hasUpperCase &&
+      strength.hasNumber &&
+      strength.hasSpecialChar
+    )
   }
 
   // Check username availability (CASE-SENSITIVE)
   const checkUsernameAvailability = async (username) => {
+    const u = (username ?? '').trim()
+
     // Don't check if less than 3 characters
-    if (username.length < 3) {
+    if (u.length < 3) {
       setUsernameStatus({
         checking: false,
         available: null,
@@ -67,38 +94,58 @@ function Register() {
       message: 'Checking availability...'
     })
 
-    // Send username as-is (CASE-SENSITIVE)
-    const response = await apiClient.checkUsernameAvailability(username)
+    const response = await apiClient.checkUsernameAvailability(u)
 
-    if (response.success && response.data.available) {
+    // With the updated backend, response.data.available is present on both success and failure payloads (if parsed)
+    // But on some errors your API client may return data=null; so we fall back to status/message.
+    const available = response?.data?.available
+
+    if (response.success && available === true) {
       setUsernameStatus({
         checking: false,
         available: true,
-        message: '✓ Username available'
+        message: response?.data?.message || response.message || '✓ Username available'
       })
-    } else {
+      return
+    }
+
+    if (response.status === 409 || available === false) {
       setUsernameStatus({
         checking: false,
         available: false,
-        message: response.data?.message || 'Username already taken'
+        message: response?.data?.message || response.message || 'Username already taken'
       })
+      return
     }
+
+    if (response.status === 400) {
+      setUsernameStatus({
+        checking: false,
+        available: null,
+        message: response?.data?.message || response.message || 'Username must be at least 3 characters'
+      })
+      return
+    }
+
+    setUsernameStatus({
+      checking: false,
+      available: null,
+      message: response?.data?.message || response.message || 'Could not check username right now'
+    })
   }
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
-    
-    // Validate username availability as user types (EXACT CASE-SENSITIVE MATCH)
+
     if (name === 'username') {
       checkUsernameAvailability(value)
     }
-    
-    // Validate password strength as user types
+
     if (name === 'password') {
       validatePasswordStrength(value)
     }
-    
+
     setError('')
   }
 
@@ -107,14 +154,16 @@ function Register() {
     setError('')
     setSuccess('')
 
+    const trimmedUsername = (formData.username ?? '').trim()
+
     // Client-side validation
-    if (formData.username.length < 3) {
+    if (trimmedUsername.length < 3) {
       setError('Username must be at least 3 characters!')
       return
     }
 
     // Check if username is available
-    if (!usernameStatus.available) {
+    if (usernameStatus.available !== true) {
       setError('Please choose an available username!')
       return
     }
@@ -136,16 +185,14 @@ function Register() {
 
     setLoading(true)
 
-    const result = await register(
-      formData.email,
-      formData.password,
-      formData.username
-    )
+    const result = await register(formData.email, formData.password, trimmedUsername)
 
     if (result.success) {
       setSuccess(result.message)
       setFormData({ username: '', email: '', password: '', confirmPassword: '' })
       setUsernameStatus({ checking: false, available: null, message: '' })
+      setShowPassword(false)
+      setShowConfirmPassword(false)
       // Redirect to login after 2 seconds
       setTimeout(() => navigate('/login'), 2000)
     } else {
@@ -167,10 +214,16 @@ function Register() {
     }
   }
 
+  const statusClass =
+    usernameStatus.available === true
+      ? 'available'
+      : usernameStatus.available === false
+        ? 'taken'
+        : ''
+
   return (
     <div className="auth-container">
       <div className="auth-card">
-
         <div className="auth-header">
           <div className="auth-logo">💬</div>
           <h1 className="auth-title">Create account</h1>
@@ -202,7 +255,6 @@ function Register() {
         <form className="auth-form" onSubmit={handleRegister}>
           <div className="auth-input-group">
             <label>Username</label>
-            <p className="username-hint">Every letter, number, and character matters! • john ≠ John ≠ JOHN • j0hn! ≠ john</p>
             <div className="username-input-wrapper">
               <input
                 type="text"
@@ -216,8 +268,9 @@ function Register() {
                 <span className="username-spinner">⏳</span>
               )}
             </div>
+
             {formData.username && (
-              <p className={`username-status ${usernameStatus.available ? 'available' : 'taken'}`}>
+              <p className={`username-status ${statusClass}`}>
                 {usernameStatus.message}
               </p>
             )}
@@ -237,15 +290,26 @@ function Register() {
 
           <div className="auth-input-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            
+
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <EyeIcon off={showPassword} />
+              </button>
+            </div>
+
             {/* Password Requirements Checklist */}
             {formData.password && (
               <div className="password-requirements">
@@ -280,20 +344,31 @@ function Register() {
 
           <div className="auth-input-group">
             <label>Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
+
+            <div className="password-input-wrapper">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                <EyeIcon off={showConfirmPassword} />
+              </button>
+            </div>
           </div>
 
           {(error || authError) && <p className="auth-error">{error || authError}</p>}
           {success && <p className="auth-success">{success}</p>}
 
-          <button type="submit" className="auth-btn" disabled={loading || !usernameStatus.available}>
+          <button type="submit" className="auth-btn" disabled={loading || usernameStatus.available !== true}>
             {loading ? <span className="auth-spinner"></span> : 'Create Account'}
           </button>
         </form>
@@ -303,7 +378,6 @@ function Register() {
             <span onClick={() => navigate('/login')}>Login</span>
           </p>
         </div>
-
       </div>
     </div>
   )

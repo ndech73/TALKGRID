@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         console.log('🔐 Initializing auth...')
-        
+
         // Get current session from Supabase
         const { data, error: sessionError } = await supabase.auth.getSession()
 
@@ -157,45 +157,48 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  // UPDATED: login now uses backend gateway /api/security/login
   const login = useCallback(async (email, password) => {
     try {
       setError(null)
       setLoading(true)
 
-      console.log('🔑 Logging in:', email)
+      console.log('🔑 Logging in (security gateway):', email)
 
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      const response = await apiClient.securityLogin(email, password)
+
+      if (!response.success) {
+        // Backend returns meaningful messages for:
+        // - 401 invalid credentials
+        // - 423 locked (too many attempts)
+        // - 429 rate limited (express-rate-limit)
+        throw new Error(response.message || response.error || 'Login failed')
+      }
+
+      const backendSession = response?.data?.session
+      if (!backendSession?.access_token || !backendSession?.refresh_token) {
+        throw new Error('Login failed: missing session tokens')
+      }
+
+      // Set the session into Supabase client.
+      // This triggers onAuthStateChange(SIGNED_IN) which updates state + syncs backend.
+      const { data, error: setSessionError } = await supabase.auth.setSession({
+        access_token: backendSession.access_token,
+        refresh_token: backendSession.refresh_token
       })
 
-      if (signInError) {
-        throw signInError
+      if (setSessionError) {
+        throw setSessionError
       }
 
-      if (!data.session) {
-        throw new Error('Login failed')
+      if (!data?.session) {
+        throw new Error('Login failed - no session created')
       }
 
-      console.log('✅ Signed in with Supabase')
+      console.log('✅ Signed in via backend gateway + Supabase session set')
 
-      setSession(data.session)
-      setIsAuthenticated(true)
-
-      // Sync with backend
-      try {
-        const response = await apiClient.loginUser()
-        if (response.success) {
-          console.log('✅ Synced login with backend')
-          setUser(response.data?.user || data.session.user)
-        } else {
-          setUser(data.session.user)
-        }
-      } catch (err) {
-        console.warn('⚠️ Backend sync failed')
-        setUser(data.session.user)
-      }
-
+      // NOTE: We do not need to manually set user/session here because
+      // onAuthStateChange will handle it. But returning success now is helpful.
       return { success: true }
     } catch (err) {
       const message = err.message || 'Login failed'
