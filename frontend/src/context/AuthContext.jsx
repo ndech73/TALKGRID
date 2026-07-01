@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from '../services/supabase'
 import { apiClient } from '../services/api'
@@ -143,7 +144,7 @@ export function AuthProvider({ children }) {
           setUser(response.data)
         }
       } catch (err) {
-        console.warn('⚠️ Backend registration failed, but Supabase signup succeeded')
+        console.warn('⚠️ Backend registration failed, but Supabase signup succeeded:', err)
       }
 
       return { success: true, message: 'Registration successful! Please verify your email.' }
@@ -219,7 +220,7 @@ export function AuthProvider({ children }) {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/home`
+          redirectTo: `${window.location.origin}/home-intro`
         }
       })
 
@@ -248,7 +249,7 @@ export function AuthProvider({ children }) {
           await apiClient.logoutUser(session.id)
           console.log('✅ Backend logout successful')
         } catch (err) {
-          console.warn('⚠️ Backend logout failed')
+          console.warn('⚠️ Backend logout failed:', err)
         }
       }
 

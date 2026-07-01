@@ -57,7 +57,7 @@ function Register() {
       hasMinLength: password.length >= 7,
       hasUpperCase: /[A-Z]/.test(password),
       hasNumber: /\d/.test(password),
-      hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+      hasSpecialChar: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)
     }
     setPasswordStrength(strength)
     return strength
@@ -227,7 +227,7 @@ function Register() {
         <div className="auth-header">
           <div className="auth-logo">💬</div>
           <h1 className="auth-title">Create account</h1>
-          <p className="auth-subtitle">Join talkgrid today</p>
+          <p className="auth-subtitle">Join triad today</p>
         </div>
 
         {/* Social Signup */}

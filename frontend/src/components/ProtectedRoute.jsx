@@ -61,9 +61,21 @@ export function AdminRoute({ children }) {
 export function GuestRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
 
-  // Don't wait for loading if not authenticated
-  if (!loading && isAuthenticated) {
-    return <Navigate to="/home" replace />
+  if (loading) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div className="auth-spinner"></div>
+            <p style={{ color: '#a8b2d8', marginTop: '16px' }}>Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/home-intro" replace />
   }
 
   return children

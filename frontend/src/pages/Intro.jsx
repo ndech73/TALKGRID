@@ -39,27 +39,13 @@ function Intro() {
         <div className="intro-dots intro-dots-top" />
 
         <div className="intro-logo">
-          <svg width="90" height="90" viewBox="0 0 120 120">
-            <rect x="30" y="8" width="72" height="58" rx="16" fill="#1A1A2E" stroke="#2EC4B6" strokeWidth="2.5"/>
-            <rect x="18" y="32" width="62" height="46" rx="12" fill="#2EC4B6"/>
-            <line x1="30" y1="44" x2="68" y2="44" stroke="#1A1A2E" strokeWidth="2" opacity="0.4"/>
-            <line x1="30" y1="56" x2="68" y2="56" stroke="#1A1A2E" strokeWidth="2" opacity="0.4"/>
-            <line x1="30" y1="68" x2="68" y2="68" stroke="#1A1A2E" strokeWidth="2" opacity="0.4"/>
-            <line x1="38" y1="34" x2="38" y2="76" stroke="#1A1A2E" strokeWidth="2" opacity="0.4"/>
-            <line x1="52" y1="34" x2="52" y2="76" stroke="#1A1A2E" strokeWidth="2" opacity="0.4"/>
-            <polygon points="26,76 14,94 40,76" fill="#2EC4B6"/>
-            <circle cx="44" cy="26" r="4" fill="#2EC4B6"/>
-            <circle cx="62" cy="18" r="4" fill="#2EC4B6"/>
-            <circle cx="80" cy="26" r="4" fill="#2EC4B6"/>
-            <line x1="44" y1="26" x2="62" y2="18" stroke="#2EC4B6" strokeWidth="1.5" opacity="0.7"/>
-            <line x1="62" y1="18" x2="80" y2="26" stroke="#2EC4B6" strokeWidth="1.5" opacity="0.7"/>
-          </svg>
+          <img src="/Gemini_Generated_Image_b2hq4ob2hq4ob2hq.png" alt="Triad Logo" className="intro-logo-img" />
         </div>
 
-        <h1 className="intro-title">talkgrid</h1>
+        <h1 className="intro-title">  Triad</h1>
         <p className="intro-tagline" id="tagline"></p>
 
-        <p className="intro-new-user">New to TalkGrid?</p>
+        <p className="intro-new-user">New to Triad?</p>
 
         <button className="intro-btn" onClick={() => navigate('/register')}>
           Get Started
@@ -78,7 +64,7 @@ function Intro() {
         <div className="intro-grid" />
 
         <div className="intro-bubbles">
-          <div className="bubble bubble-left" id="b1">Hey! Welcome to talkgrid</div>
+          <div className="bubble bubble-left" id="b1">Hey! Welcome to triad</div>
           <div className="bubble bubble-right" id="b2">This looks amazing!</div>
           <div className="bubble bubble-left" id="b3">Chat with anyone, anywhere</div>
           <div className="bubble bubble-right" id="b4">Let's get started!</div>

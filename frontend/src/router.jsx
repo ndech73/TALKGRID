@@ -1,6 +1,9 @@
+// frontend/src/router.jsx
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'
 import Intro from './pages/Intro'
+import HomeIntro from './pages/HomeIntro'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -12,7 +15,14 @@ function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<Intro />} />
+        <Route 
+          path="/" 
+          element={
+            <GuestRoute>
+              <Intro />
+            </GuestRoute>
+          } 
+        />
         
         {/* Guest-only routes (redirect if logged in) */}
         <Route 
@@ -49,6 +59,14 @@ function AppRouter() {
         />
 
         {/* Protected routes (require authentication) */}
+        <Route 
+          path="/home-intro" 
+          element={
+            <ProtectedRoute>
+              <HomeIntro />
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="/home" 
           element={

@@ -1,12 +1,6 @@
-/* frontend/src/styles/Intro.css */
+/* frontend/src/styles/HomeIntro.css */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.intro-container {
+.homeintro-container {
   display: flex;
   height: 100vh;
   font-family: 'Segoe UI', sans-serif;
@@ -14,7 +8,7 @@
 }
 
 /* ── LEFT SIDE ── */
-.intro-left {
+.homeintro-left {
   flex: 1;
   background: var(--dark);
   display: flex;
@@ -33,8 +27,15 @@
   opacity: 0.15;
 }
 
-.intro-dots-top { top: 30px; left: 30px; }
-.intro-dots-bottom { bottom: 30px; right: 30px; }
+.intro-dots-top { 
+  top: 30px; 
+  left: 30px; 
+}
+
+.intro-dots-bottom { 
+  bottom: 30px; 
+  right: 30px; 
+}
 
 .intro-dots::before,
 .intro-dots::after {
@@ -45,82 +46,41 @@
   background: var(--primary);
 }
 
+/* LOGO */
 .intro-logo {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
   animation: floatLogo 3s ease-in-out infinite;
 }
 
 .intro-logo-img {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(46, 196, 182, 0.2));
+  width: 280px;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 50%;
+  mask-image: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 70%);
+  -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 70%);
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 4px 16px rgba(46, 196, 182, 0.25));
 }
 
 @keyframes floatLogo {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-12px); }
 }
 
-.intro-title {
-  color: #ffffff;
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  margin-bottom: 8px;
-}
-
+/* TAGLINE SECTION */
 .intro-tagline {
   color: var(--primary);
   font-size: 13px;
-  letter-spacing: 4px;
-  margin-bottom: 32px;
+  letter-spacing: 2px;
+  margin-top: 0;
   min-height: 20px;
-}
-
-.intro-new-user {
-  color: #a8b2d8;
-  font-size: 13px;
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-}
-
-.intro-btn {
-  background: var(--primary);
-  color: var(--dark);
-  border: none;
-  padding: 14px 44px;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  margin-bottom: 20px;
-}
-
-.intro-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 24px rgba(46, 196, 182, 0.4);
-}
-
-.intro-login {
-  color: #a8b2d8;
-  font-size: 13px;
-}
-
-.intro-login span {
-  color: var(--primary);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.intro-login span:hover {
-  text-decoration: underline;
+  text-align: center;
+  font-weight: 500;
 }
 
 /* ── RIGHT SIDE ── */
-.intro-right {
+.homeintro-right {
   flex: 1;
   background: var(--primary);
   display: flex;
@@ -190,34 +150,43 @@
   z-index: 1;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #a8b2d8;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-  .intro-container {
+  .homeintro-container {
     flex-direction: column;
   }
 
-  .intro-right {
+  .homeintro-right {
     display: none;
   }
 
-  .intro-left {
+  .homeintro-left {
     height: 100vh;
   }
 
   .intro-logo-img {
-    width: 70px;
-    height: 70px;
+    width: 220px;
+    height: 220px;
   }
 }
 
 @media (max-width: 480px) {
-  .intro-logo-img {
-    width: 60px;
-    height: 60px;
+  .homeintro-left {
+    padding: 30px 20px;
   }
 
-  .intro-title {
-    font-size: 28px;
+  .intro-logo-img {
+    width: 160px;
+    height: 160px;
+    margin-bottom: 30px;
   }
 }
-

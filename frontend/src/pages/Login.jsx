@@ -60,7 +60,7 @@ function Login() {
       }
 
       // AuthContext will set the session; we can redirect immediately.
-      setTimeout(() => navigate('/home'), 300)
+      setTimeout(() => navigate('/home-intro'), 300)
     } catch (err) {
       setError('❌ ' + (err.message || 'Login failed'))
     } finally {
@@ -90,7 +90,7 @@ function Login() {
         <div className="auth-header">
           <div className="auth-logo">💬</div>
           <h1 className="auth-title">Welcome back</h1>
-          <p className="auth-subtitle">Sign in to talkgrid</p>
+          <p className="auth-subtitle">Sign in to triad</p>
         </div>
 
         {unlockedNotice && (

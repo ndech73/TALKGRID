@@ -39,7 +39,7 @@ function ForgotPassword() {
         setEmail('')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(err.message || 'An error occurred. Please try again.')
     }
 
     setLoading(false)

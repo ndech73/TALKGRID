@@ -25,7 +25,7 @@ function Home() {
     <div className="home-container">
       <header className="home-header">
         <div className="header-left">
-          <h1 className="logo">💬 TalkGrid</h1>
+          <h1 className="logo">💬 Triad</h1>
         </div>
         <div className="header-right">
           <div className="user-menu">
@@ -46,7 +46,7 @@ function Home() {
       <main className="home-main">
         <div className="welcome-section">
           <h2>Welcome, {user?.displayName || user?.username}!</h2>
-          <p>You're successfully logged in to TalkGrid</p>
+          <p>You're successfully logged in to Triad</p>
           
           <div className="user-profile-card">
             <h3>Your Profile</h3>

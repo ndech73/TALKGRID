@@ -69,9 +69,9 @@ router.post('/login', loginLimiter, async (req, res) => {
         // Fire-and-forget email (don’t block response if email fails)
         sendMail({
           to: email,
-          subject: 'TalkGrid security alert: login attempts blocked',
+          subject: 'Triad security alert: login attempts blocked',
           text:
-`We detected multiple failed login attempts on your TalkGrid account.
+`We detected multiple failed login attempts on your Triad account.
 
 For your security, we locked login for 5 minutes.
 
@@ -80,7 +80,7 @@ ${verifyUrl}
 
 If this wasn’t you, we recommend changing your password.`,
           html:
-`<p>We detected multiple failed login attempts on your TalkGrid account.</p>
+`<p>We detected multiple failed login attempts on your Triad account.</p>
 <p><b>For your security, we locked login for 5 minutes.</b></p>
 <p>If this was you, you can unlock immediately:</p>
 <p><a href="${verifyUrl}">Unlock my account</a></p>

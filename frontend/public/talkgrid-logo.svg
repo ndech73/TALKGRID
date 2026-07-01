@@ -25,7 +25,7 @@
   <line x1="123" y1="40" x2="144" y2="32" stroke="#2EC4B6" stroke-width="1" opacity="0.6"/>
   <line x1="144" y1="32" x2="165" y2="40" stroke="#2EC4B6" stroke-width="1" opacity="0.6"/>
   <!-- Wordmark -->
-  <text x="150" y="142" text-anchor="middle" font-size="28" font-weight="700" fill="#ffffff" letter-spacing="1">talkgrid</text>
+  <text x="150" y="142" text-anchor="middle" font-size="28" font-weight="700" fill="#ffffff" letter-spacing="1">triad</text>
   <!-- Tagline -->
   <text x="150" y="162" text-anchor="middle" font-size="11" fill="#2EC4B6" letter-spacing="3">connect · chat</text>
 </svg>
