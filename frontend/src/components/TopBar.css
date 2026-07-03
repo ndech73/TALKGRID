@@ -1,0 +1,30 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px var(--spacing-lg);
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar__left, .topbar__right { display: flex; align-items: center; gap: var(--spacing-md); }
+.topbar__logo  { display: flex; align-items: center; gap: 8px; }
+.topbar__brand { font-size: var(--font-size-lg); font-weight: 600; color: var(--text-primary); letter-spacing: 1.5px; }
+.topbar__title { font-size: var(--font-size-md); font-weight: 600; color: var(--text-primary); margin: 0; }
+.topbar__icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--dark-light);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-secondary);
+}
+.topbar__icon-btn svg { width: 17px; height: 17px; }
+.topbar__icon-btn:hover { background: var(--dark-lighter); border-color: var(--primary); color: var(--primary); }
+.topbar__ai-btn { color: var(--primary); border-color: rgba(46,196,182,0.4); background: rgba(46,196,182,0.08); }
+.topbar__ai-btn:hover { background: rgba(46,196,182,0.18); }

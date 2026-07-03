@@ -1,0 +1,15 @@
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.notification-badge--primary { background: var(--primary); color: var(--dark); }
+.notification-badge--danger  { background: var(--danger); color: #fff; }
+.notification-badge--muted   { background: var(--dark-lighter); color: var(--text-secondary); }

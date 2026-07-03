@@ -1,19 +1,27 @@
-import './Avatar.css'
+import './Avatar.css';
 
-function Avatar({ name, image, size = 'md', online = false }) {
+const Avatar = ({ src, name, size = 42, showOnline = false, isOnline = false }) => {
   const initials = name
-    ? name.split(' ').map(n => n[0]).join('').toUpperCase()
-    : '?'
+    ?.split(' ')
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className={`avatar avatar-${size}`}>
-      {image 
-        ? <img src={image} alt={name} className="avatar-img" />
-        : <span className="avatar-initials">{initials}</span>
-      }
-      {online && <span className="avatar-online"></span>}
+    <div className="avatar-wrapper" style={{ width: size, height: size }}>
+      {src ? (
+        <img className="avatar-img" src={src} alt={name} />
+      ) : (
+        <div className="avatar-fallback" style={{ fontSize: size * 0.35 }}>
+          {initials}
+        </div>
+      )}
+      {showOnline && (
+        <span className={`avatar-status ${isOnline ? 'online' : 'offline'}`} />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Avatar
+export default Avatar;

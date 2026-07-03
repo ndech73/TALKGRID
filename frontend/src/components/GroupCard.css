@@ -1,0 +1,15 @@
+.group-card {
+  display: flex; align-items: center; gap: var(--spacing-md);
+  padding: 10px var(--spacing-lg); width: 100%;
+  background: none; border: none; cursor: pointer; text-align: left;
+  transition: background 0.15s ease;
+}
+.group-card:hover { background: rgba(46,196,182,0.06); }
+.group-card__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.group-card__row  { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); }
+.group-card__name { font-size: var(--font-size-sm); font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.group-card__time { font-size: var(--font-size-xs); color: var(--text-muted); flex-shrink: 0; }
+.group-card__time.unread { color: var(--primary); }
+.group-card__preview { font-size: var(--font-size-xs); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.group-card__right   { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.group-card__members { font-size: 10px; color: var(--text-muted); }
