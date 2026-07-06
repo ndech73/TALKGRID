@@ -1,5 +1,5 @@
-import Avatar from '../Avatar';
-import NotificationBadge from '../NotificationBadge';
+import Avatar from '../../../shared/components/Avatar';
+import NotificationBadge from '../../../shared/components/NotificationBadge';
 import './GroupCard.css';
 
 const GroupCard = ({ group, onClick }) => {

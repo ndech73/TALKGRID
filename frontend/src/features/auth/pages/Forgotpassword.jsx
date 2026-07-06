@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../services/supabase'
+import { supabase } from '../../../shared/services/supabase'
 import '../styles/Forgotpassword.css'
 
 function ForgotPassword() {

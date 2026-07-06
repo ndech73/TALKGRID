@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { apiClient } from '../services/api'
+import { useAuth } from '../../../shared/hooks/useAuth'
+import { apiClient } from '../../../shared/services/api'
 import '../styles/Register.css'
 
 function EyeIcon({ off = false }) {

@@ -1,4 +1,4 @@
-import ChatItem from '../ChatItem';
+import ChatItem from './ChatItem';
 import './ChatList.css';
 
 const ChatList = ({ chats = [], activeChatId, onSelectChat }) => {

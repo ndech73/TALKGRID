@@ -1,4 +1,4 @@
-import StoryAvatar from '../StoryAvatar';
+import StoryAvatar from './StoryAvatar';
 import './StoryRail.css';
 
 const StoryRail = ({ stories = [], onAddStory, onViewStory }) => (

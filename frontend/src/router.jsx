@@ -1,14 +1,14 @@
 // frontend/src/router.jsx
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'
-import Intro from './pages/Intro'
-import HomeIntro from './pages/HomeIntro'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Forgotpassword from './pages/Forgotpassword'
-import Resetpassword from './pages/Resetpassword'
+import { ProtectedRoute, GuestRoute } from './shared/components/ProtectedRoute'
+import Intro from './features/auth/pages/Intro'
+import HomeIntro from './features/auth/pages/HomeIntro'
+import Home from './features/chat/pages/HomePage'
+import Login from './features/auth/pages/Login'
+import Register from './features/auth/pages/Register'
+import Forgotpassword from './features/auth/pages/Forgotpassword'
+import Resetpassword from './features/auth/pages/Resetpassword'
 
 function AppRouter() {
   return (

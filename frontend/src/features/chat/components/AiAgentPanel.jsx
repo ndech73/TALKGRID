@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import './AIAgentPanel.css';
+import './AiAgentPanel.css';
 
 const AIAgentPanel = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([

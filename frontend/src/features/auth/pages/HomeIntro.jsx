@@ -1,7 +1,7 @@
 // frontend/src/pages/HomeIntro.jsx
 
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../../../shared/hooks/useAuth'
 import { useEffect, useState } from 'react'
 import '../styles/HomeIntro.css'
 

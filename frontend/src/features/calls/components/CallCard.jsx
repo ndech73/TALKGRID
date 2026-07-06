@@ -1,4 +1,4 @@
-import Avatar from '../Avatar';
+import Avatar from '../../../shared/components/Avatar';
 import './CallCard.css';
 
 const CallCard = ({ call, onCallBack }) => {

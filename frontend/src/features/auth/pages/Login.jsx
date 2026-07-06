@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../../../shared/hooks/useAuth'
 import '../styles/Login.css'
 
 function EyeIcon({ off = false }) {

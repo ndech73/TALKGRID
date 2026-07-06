@@ -1,4 +1,4 @@
-import './AIAgentButton.css';
+import './AiAgentButton.css';
 
 const AIAgentButton = ({ onClick, hasActivity = false }) => (
   <button className={`ai-agent-btn ${hasActivity ? 'active' : ''}`} onClick={onClick} aria-label="Open AI assistant">

@@ -1,4 +1,4 @@
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider } from './shared/context/AuthContext'
 import AppRouter from './router'
 
 function App() {
