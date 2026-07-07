@@ -23,6 +23,7 @@ app.use(express.json())
 // Routes
 app.use('/api/auth', require('./src/routes/auth'))
 app.use('/api/messages', require('./src/routes/messages'))
+app.use('/api/conversations', require('./src/routes/conversations'))
 app.use('/api/security', require('./src/routes/security'))
 
 // Socket.IO

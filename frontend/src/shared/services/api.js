@@ -171,6 +171,11 @@ class APIClient {
     })
   }
 
+  // Conversation endpoints
+  async getConversations() {
+    return this.request('/api/conversations')
+  }
+
   // Message endpoints
   async getMessages(conversationId) {
     return this.request(`/api/messages?conversationId=${conversationId}`)

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import NotificationBadge from '../NotificationBadge';
+import NotificationBadge from './NotificationBadge';
 import './BottomNav.css';
 
 const NAV_ITEMS = [

@@ -1,3 +1,15 @@
-const chatService = {};
+import { apiClient } from '../../../shared/services/api'
 
-export default chatService;
+const chatService = {
+  async getChats() {
+    const response = await apiClient.getConversations()
+
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to load chats')
+    }
+
+    return response.data?.conversations || []
+  },
+}
+
+export default chatService
