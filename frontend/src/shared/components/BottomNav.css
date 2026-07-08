@@ -24,3 +24,44 @@
 .bottom-nav__logo-btn:hover,
 .bottom-nav__logo-btn.open { border-color: var(--primary); box-shadow: 0 0 0 6px rgba(26,26,46,0.92), 0 0 20px rgba(46,196,182,0.25); }
 .bottom-nav__dot { position: absolute; top: -4px; right: -4px; }
+
+/* ---- Desktop: vertical sidebar instead of bottom bar ---- */
+@media (min-width: 1024px) {
+  .bottom-nav {
+    top: 0;
+    bottom: 0;
+    right: auto;
+    width: 84px;
+    height: 100vh;
+    border-top: none;
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+  }
+
+  .bottom-nav__inner {
+    flex-direction: column;
+    max-width: none;
+    height: 100%;
+    justify-content: flex-start;
+    gap: 32px;
+  }
+
+  .bottom-nav__center {
+    order: -1;
+    margin-bottom: 8px;
+  }
+
+  .bottom-nav__logo-btn {
+    margin-top: 0;
+    box-shadow: none;
+  }
+
+  .bottom-nav__logo-btn:hover,
+  .bottom-nav__logo-btn.open {
+    box-shadow: 0 0 20px rgba(46,196,182,0.25);
+  }
+
+  .bottom-nav__item {
+    min-width: auto;
+  }
+}

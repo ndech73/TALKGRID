@@ -34,7 +34,7 @@ router.get('/', verifyToken, async (req, res) => {
     })
 
     const formatted = conversations.map((conv) => {
-      // For direct chats, show the *other* participant's name/avatar
+      // For direct chats, show the other participant's name/avatar
       const otherParticipant = conv.participants.find(
         (p) => p.userId !== localUser.id
       )?.user
@@ -43,7 +43,10 @@ router.get('/', verifyToken, async (req, res) => {
 
       return {
         id: conv.id,
-        name: conv.type === 'group' ? conv.name : otherParticipant?.displayName || otherParticipant?.username,
+        name:
+          conv.type === 'group'
+            ? conv.name
+            : otherParticipant?.displayName || otherParticipant?.username,
         avatarUrl: conv.type === 'group' ? null : otherParticipant?.avatar || null,
         lastMessage: lastMessage?.content || '',
         timestamp: lastMessage?.createdAt || conv.createdAt,
@@ -51,10 +54,15 @@ router.get('/', verifyToken, async (req, res) => {
       }
     })
 
-    res.json({ success: true, conversations: formatted })
+    // IMPORTANT: shared frontend API client expects payload in `data`
+    return res.status(200).json({
+      success: true,
+      message: 'Conversations fetched successfully',
+      data: formatted,
+    })
   } catch (error) {
     console.error('Error fetching conversations:', error)
-    res.status(500).json({ success: false, message: 'Failed to fetch conversations' })
+    return res.status(500).json({ success: false, message: 'Failed to fetch conversations' })
   }
 })
 

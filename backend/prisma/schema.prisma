@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -29,6 +28,7 @@ model User {
   messages          Message[]
   auditLogs         AuditLog[]
   conversations     Conversation[]
+  participantOf     ConversationParticipant[]
   blockedUsers      BlockedUser[] @relation("blocker")
   blockedBy         BlockedUser[] @relation("blocked")
 
@@ -95,6 +95,7 @@ model ConversationParticipant {
   conversationId    String
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   role              String    @default("member") // member, moderator, admin
   joinedAt          DateTime  @default(now())
   leftAt            DateTime?

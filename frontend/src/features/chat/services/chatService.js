@@ -1,15 +1,15 @@
 import { apiClient } from '../../../shared/services/api'
 
 const chatService = {
-  async getChats() {
-    const response = await apiClient.getConversations()
+  async getConversations() {
+    const res = await apiClient.getConversations()
 
-    if (!response.success) {
-      throw new Error(response.message || 'Failed to load chats')
+    if (!res.success) {
+      throw new Error(res.message || 'Failed to fetch conversations')
     }
 
-    return response.data?.conversations || []
-  },
+    return res.data || []
+  }
 }
 
 export default chatService

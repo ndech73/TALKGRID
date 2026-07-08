@@ -1,18 +1,13 @@
-import { useState } from 'react';
 import './SearchBar.css';
 
-const SearchBar = ({ placeholder = 'Search chats and people', onSearch, onClear }) => {
-  const [value, setValue] = useState('');
-
+const SearchBar = ({ value = '', onChange, placeholder = 'Search chats and people', onClear }) => {
   const handleChange = (e) => {
-    setValue(e.target.value);
-    onSearch?.(e.target.value);
+    onChange?.(e.target.value);
   };
 
   const handleClear = () => {
-    setValue('');
+    onChange?.('');
     onClear?.();
-    onSearch?.('');
   };
 
   return (

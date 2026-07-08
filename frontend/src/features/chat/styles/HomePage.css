@@ -1,4 +1,4 @@
-/* src/styles/Home.css */
+/* src/features/chat/styles/HomePage.css */
 
 .home-page {
   position: relative;
@@ -33,7 +33,7 @@
   height: 280px;
   bottom: 120px;
   left: -80px;
-  background: var(--dark-lighter); /* no purple var exists yet — see note below */
+  background: var(--dark-lighter);
 }
 
 /* ---- Loading / error states ---- */
@@ -50,6 +50,11 @@
 .home-error p {
   color: var(--text-muted);
   font-size: 14px;
+}
+
+/* ---- Search bar spacing (gap below TopBar, gap above story rail/chats) ---- */
+.home-page > .search-bar {
+  margin: 16px 16px 20px;
 }
 
 /* ---- Main content area ---- */
@@ -75,15 +80,30 @@
   flex-shrink: 0;
 }
 
-/* ---- Responsive ---- */
+/* ---- Responsive: mobile ---- */
 @media (max-width: 480px) {
   .home-content {
     padding: 0 12px;
+  }
+
+  .home-page > .search-bar {
+    margin: 12px 12px 16px;
   }
 
   .home-glow--top,
   .home-glow--bottom {
     width: 220px;
     height: 220px;
+  }
+}
+
+/* ---- Responsive: desktop — leave room for the vertical sidebar nav ---- */
+@media (min-width: 1024px) {
+  .home-page {
+    padding-left: 84px;
+  }
+
+  .home-main {
+    padding-bottom: 24px;
   }
 }
