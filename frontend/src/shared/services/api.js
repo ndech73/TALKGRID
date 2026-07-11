@@ -176,6 +176,22 @@ class APIClient {
     return this.request('/api/conversations')
   }
 
+  async startConversation(username) {
+    return this.request('/api/conversations/start', {
+      method: 'POST',
+      body: JSON.stringify({ username })
+    })
+  }
+
+  // User search & profile endpoints
+  async searchUsers(query) {
+    return this.request(`/api/users/search?q=${encodeURIComponent(query)}`)
+  }
+
+  async getPublicProfile(username) {
+    return this.request(`/api/users/profile/${encodeURIComponent(username)}`)
+  }
+
   // Message endpoints
   async getMessages(conversationId) {
     return this.request(`/api/messages?conversationId=${conversationId}`)

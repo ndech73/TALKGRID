@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBadge from './NotificationBadge';
 import './BottomNav.css';
@@ -11,35 +10,24 @@ const NAV_ITEMS = [
 ];
 
 const BottomNav = ({ notificationCount = 0 }) => {
-  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleNav = (path) => { navigate(path); setExpanded(false); };
+  const handleNav = (path) => { navigate(path); };
 
   return (
-    <nav className={`bottom-nav ${expanded ? 'expanded' : ''}`}>
+    <nav className="bottom-nav">
       <div className="bottom-nav__inner">
-        {NAV_ITEMS.slice(0, 2).map((item) => (
+        {NAV_ITEMS.map((item) => (
           <button key={item.key} className={`bottom-nav__item ${location.pathname === item.path ? 'active' : ''}`} onClick={() => handleNav(item.path)} aria-label={item.label}>
-            <span className="bottom-nav__icon">{item.icon}</span>
-            <span className="bottom-nav__label">{item.label}</span>
-          </button>
-        ))}
-
-        <div className="bottom-nav__center">
-          <button className={`bottom-nav__logo-btn ${expanded ? 'open' : ''}`} onClick={() => setExpanded((v) => !v)} aria-label="Toggle navigation">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <path d="M12 3L4 19H20L12 3Z" stroke="#7DD3E8" strokeWidth="1.6" strokeLinejoin="round" />
-              <path d="M12 7.5L7.5 16.5H16.5L12 7.5Z" stroke="#A78BFA" strokeWidth="1.6" strokeLinejoin="round" />
-            </svg>
-            {notificationCount > 0 && <span className="bottom-nav__dot"><NotificationBadge count={notificationCount} /></span>}
-          </button>
-        </div>
-
-        {NAV_ITEMS.slice(2).map((item) => (
-          <button key={item.key} className={`bottom-nav__item ${location.pathname === item.path ? 'active' : ''}`} onClick={() => handleNav(item.path)} aria-label={item.label}>
-            <span className="bottom-nav__icon">{item.icon}</span>
+            <span className="bottom-nav__icon" style={{ position: 'relative' }}>
+              {item.icon}
+              {item.key === 'notifications' && notificationCount > 0 && (
+                <span className="bottom-nav__dot" style={{ position: 'absolute', top: '-4px', right: '-4px' }}>
+                  <NotificationBadge count={notificationCount} />
+                </span>
+              )}
+            </span>
             <span className="bottom-nav__label">{item.label}</span>
           </button>
         ))}

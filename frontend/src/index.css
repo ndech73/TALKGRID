@@ -13,6 +13,23 @@
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   --radius: 12px;
   --radius-full: 50px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+
+  /* Transitions */
+  --transition: all 0.2s ease-in-out;
 }
 
 * {

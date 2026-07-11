@@ -9,12 +9,12 @@ import Login from './features/auth/pages/Login'
 import Register from './features/auth/pages/Register'
 import Forgotpassword from './features/auth/pages/Forgotpassword'
 import Resetpassword from './features/auth/pages/Resetpassword'
+import ProfilePage from './features/profile/pages/ProfilePage'
 
 function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
         <Route 
           path="/" 
           element={
@@ -23,8 +23,6 @@ function AppRouter() {
             </GuestRoute>
           } 
         />
-        
-        {/* Guest-only routes (redirect if logged in) */}
         <Route 
           path="/login" 
           element={
@@ -57,8 +55,6 @@ function AppRouter() {
             </GuestRoute>
           } 
         />
-
-        {/* Protected routes (require authentication) */}
         <Route 
           path="/home-intro" 
           element={
@@ -72,6 +68,14 @@ function AppRouter() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile/:username" 
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           } 
         />
